@@ -1,0 +1,3 @@
+file_root: t/cases
+fixture_root: t/lib
+fixture_base: Fixture
