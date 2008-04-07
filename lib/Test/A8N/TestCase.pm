@@ -1,7 +1,38 @@
 package Test::A8N::TestCase;
+use warnings;
+use strict;
 
 # NB: Moose also enforces 'strict' and warnings;
 use Moose;
+use Storable qw(dclone);
+use YAML::Syck;
+use File::Spec::Functions;
+
+sub BUILD {
+    my $self = shift;
+    my @configs = ();
+    foreach my $file (@{ $self->configuration }) {
+        $file = catfile($self->config->{file_root}, $file);
+        if (!-f $file) {
+            die sprintf(
+                q{Can't load configuration file "%s" for testcase "%s" in file "%s"; no such file.}, 
+                $file, $self->name, $self->filename
+            );
+        }
+        push @configs, %{ LoadFile($file) };
+    }
+    push @configs, %{ dclone($self->config) };
+    my %config = @configs;
+    foreach my $key (keys %config) {
+        $self->config->{$key} = $config{$key};
+    }
+}
+
+has config => (
+    is          => q{ro},
+    required    => 1,
+    isa         => q{HashRef}
+);
 
 my %default_lazy = (
     required => 1,
@@ -72,6 +103,17 @@ has tags => (
         return [];
     }
 );
+
+sub hasTags {
+    my $self = shift;
+    my $truth = 1;
+    foreach my $tag (@_) {
+        #warn "Inspecting tag $tag against " . join(", ", @{ $self->tags }) . "\n";
+        $truth = 0 unless (grep {$_ eq $tag} @{ $self->tags });
+    }
+    #warn "Returning truth $truth\n";
+    return $truth;
+}
 
 has configuration => (
     %default_lazy,

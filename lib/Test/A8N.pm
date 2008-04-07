@@ -1,11 +1,38 @@
 package Test::A8N;
+use warnings;
+use strict;
 
 # NB: Moose also enforces 'strict' and warnings;
 use Moose;
+use Test::FITesque::Suite;
+use Test::FITesque::Test;
 use Test::A8N::File;
 use File::Find;
+use Storable qw(dclone);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
+sub BUILD {
+    my $self = shift;
+    my %defaults = (
+        fixture_base       => "Fixture",
+        file_root          => "cases",
+        filenames          => [],
+        verbose            => 0,
+        tags               => [],
+        allowed_extensions => [qw( tc st )],
+    );
+    foreach my $key (keys %defaults) {
+        next if exists $self->config->{$key};
+        $self->config->{$key} = $defaults{$key};
+    }
+}
+
+has config => (
+    is          => q{ro},
+    required    => 1,
+    isa         => q{HashRef}
+);
 
 my %default_lazy = (
     required => 1,
@@ -15,44 +42,39 @@ my %default_lazy = (
 );
 
 has verbose => (
-    is          => q{rw},
-    required    => 0,
-    isa         => q{Int},
-    default     => 0,
+    %default_lazy,
+    isa     => q{Int},
+    default => sub { return shift->config->{verbose} },
 );
 
 has testcase_id => (
-    is          => q{rw},
-    required    => 0,
-    isa         => q{Str}
+    %default_lazy,
+    isa     => q{Str},
+    default => sub { return shift->config->{testcase_id} },
 );
 
 has filenames => (
-    is          => q{rw},
-    required    => 0,
-    isa         => q{ArrayRef},
-    default     => sub { return [] }
+    %default_lazy,
+    isa     => q{ArrayRef},
+    default => sub { return shift->config->{filenames} },
 );
 
 has file_root => (
-    is          => q{rw},
-    required    => 1,
-    isa         => q{Str}
+    %default_lazy,
+    isa     => q{Str},
+    default => sub { return shift->config->{file_root} },
 );
 
 has fixture_base => (
-    is          => q{rw},
-    required    => 1,
-    isa         => q{Str}
+    %default_lazy,
+    isa     => q{Str},
+    default => sub { return shift->config->{fixture_base} },
 );
 
 has allowed_extensions => (
-    is       => q(rw),
-    required => 1,
-    isa      => q{ArrayRef},
-    default  => sub {
-        return ["st", "tc"];
-    }
+    %default_lazy,
+    isa     => q{ArrayRef},
+    default => sub { return shift->config->{allowed_extensions} },
 );
 
 has file_paths => ( 
@@ -87,10 +109,8 @@ has files => (
         my @files = ();
         for my $filename ( @{ $self->file_paths } ) {
             push @files, Test::A8N::File->new({
-                filename     => $filename,
-                fixture_base => $self->fixture_base,
-                file_root    => $self->file_root,
-                verbose      => $self->verbose,
+                filename => $filename,
+                config   => dclone( $self->config ),
             });
         }
         return \@files;
@@ -99,9 +119,29 @@ has files => (
 
 sub run_tests {
     my $self = shift;
+    my $id = $self->testcase_id;
+    my $suite = Test::FITesque::Suite->new();
+
+    my $test_count = 0;
     foreach my $file (@{ $self->files }) {
-        $file->run_tests($self->testcase_id);
+        my @cases = @{ $self->config->{tags} }
+            ? grep { $_->hasTags(@{ $self->config->{tags} }) } @{ $file->cases }
+            : @{ $file->cases };
+        foreach my $case (@cases) {
+            next if (defined $id and $case->id ne $id);
+
+            my @data = @{ $case->test_data };
+            my $test = Test::FITesque::Test->new({
+                data => [ 
+                    [$file->fixture_class, { testcase => $case } ], 
+                    @data 
+                ]
+            });
+            $suite->add($test);
+            $test_count++;
+        }
     }
+    $suite->run_tests() if $test_count > 0;
 }
 
 # unimport moose functions to make immutable

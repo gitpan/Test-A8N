@@ -9,17 +9,19 @@ use YAML::Syck;
 
 our $config = {};
 my $home = $ENV{HOME};
-my $config_path = undef;
+my $config_path;
 
-our @allowed_extensions = qw( tc st );
-our $verbose = 0;
+our @allowed_extensions;
+our $verbose;
+our $version = 0;
 our $help = 0;
 our $fixture_base;
 our $file_root;
 our $test_id;
 our @tags = ();
 GetOptions(
-    'verbose+'         => \$verbose,
+    'version'          => \$version,
+    'v|verbose+'       => \$verbose,
     'help'             => \$help,
     'b|fixture_base=s' => \$fixture_base,
     'r|file_root=s'    => \$file_root,
@@ -29,48 +31,40 @@ GetOptions(
     'id=s'             => \$test_id,
 ) or usage();
 usage() if $help;
+version() if $version;
 
 if (defined($config_path) and !-f $config_path) {
     warn "Can't find specified config file \"$config_path\"\n";
     usage();
 }
 $config_path ||= glob("$home/.a8rc");
-if (defined($config_path) and -f $config_path) {
+if (defined($config_path) and -r $config_path) {
     $config = LoadFile($config_path);
 }
 
 if ($config->{fixture_root}) {
     lib->import($config->{fixture_root});
 }
-
 @tags = split(/,/, join(',', @tags));
 
-$fixture_base ||= $config->{fixture_base} || "Fixture";
-$file_root    ||= $config->{file_root}    || "cases";
+$config->{allowed_extensions} = \@allowed_extensions if @allowed_extensions;
+$config->{fixture_base}       = $fixture_base if defined $fixture_base;
+$config->{file_root}          = $file_root if defined $file_root;
+$config->{verbose}            = $verbose if defined $verbose;
+$config->{tags}               = \@tags if @tags;
+$config->{filenames}          = \@ARGV if @ARGV;
+$config->{testcase_id}        = $test_id if defined $test_id;
 
-my @filenames = @ARGV;
-
-if ($test_id and @filenames > 1) {
-    @filenames = ( shift @filenames );
-}
-
-my %args = (
-    fixture_base       => $fixture_base,
-    file_root          => $file_root,
-    filenames          => \@filenames,
-    verbose            => $verbose,
-    allowed_extensions => \@allowed_extensions,
-);
-$args{testcase_id} = $test_id
-    if ($test_id);
-$args{tags} = \@tags
-    if (@tags);
-
-my $a8n = Test::A8N->new(\%args);
+my $a8n = Test::A8N->new({ config => $config });
 $a8n->run_tests();
 
 sub usage {
     pod2usage();
+}
+
+sub version {
+    print "a8it version " . $Test::A8N::VERSION . "\n";
+    exit 2;
 }
 
 __END__

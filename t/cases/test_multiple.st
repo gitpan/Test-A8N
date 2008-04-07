@@ -26,7 +26,6 @@ SUMMARY: This is a test summary
 
 TAGS:
     - tag1
-    - tag2
 
 INSTRUCTIONS:
     - fixture1
@@ -45,8 +44,7 @@ NAME: Test Case 3
 SUMMARY: This is a test summary
 
 TAGS:
-    - tag1
-    - tag2
+    - tag3
 
 INSTRUCTIONS:
     - fixture1

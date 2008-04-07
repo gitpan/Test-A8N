@@ -1,13 +1,19 @@
 package Test::A8N::File;
+use warnings;
+use strict;
 
 # NB: Moose also enforces 'strict' and warnings;
 use Moose;
 use YAML::Syck;
 use Test::A8N::TestCase;
 use Module::Load;
-use Test::FITesque::Suite;
-use Test::FITesque::Test;
-use Test::Builder;
+use Storable qw(dclone);
+
+has config => (
+    is          => q{ro},
+    required    => 1,
+    isa         => q{HashRef}
+);
 
 my %default_lazy = (
     required => 1,
@@ -17,28 +23,27 @@ my %default_lazy = (
 );
 
 has filename => (
-    is          => q{rw},
+    is          => q{ro},
     required    => 1,
     isa         => q{Str}
 );
 
 has file_root => (
-    is          => q{rw},
-    required    => 1,
-    isa         => q{Str}
+    %default_lazy,
+    isa     => q{Str},
+    default => sub { return shift->config->{file_root} },
 );
 
 has fixture_base => (
-    is          => q{rw},
-    required    => 1,
-    isa         => q{Str}
+    %default_lazy,
+    isa     => q{Str},
+    default => sub { return shift->config->{fixture_base} },
 );
 
 has verbose => (
-    is          => q{rw},
-    required    => 0,
-    isa         => q{Int},
-    default     => 0,
+    %default_lazy,
+    isa     => q{Int},
+    default => sub { return shift->config->{verbose} },
 );
 
 has data => (
@@ -70,6 +75,7 @@ has cases => (
                 'data'     => $case,
                 'index'    => ++$idx,
                 'filename' => $filename,
+                'config'   => dclone( $self->config ),
             });
             push @cases, $case if ($case->is_valid);
         }
@@ -111,30 +117,6 @@ has fixture_class => (
         die 'Cannot find a fixture class for "' . $self->filename . '"';
     }
 );
-
-sub run_tests {
-    my $self = shift;
-    my ($id) = @_;
-
-    #my $suite = Test::FITesque::Suite->new();
-    my $builder = $Test::FITesque::Test::TEST_BUILDER || Test::Builder->new();
-
-    my $cases = $self->cases();
-    foreach my $case (@{ $cases }) {
-        next if (defined $id and $case->id ne $id);
-        my @data = @{ $case->test_data };
-        my $test = Test::FITesque::Test->new({
-            data => [ 
-                [$self->fixture_class, { testcase => $case, verbose => $self->verbose } ], 
-                @data 
-            ],
-        });
-        #$suite->add($test);
-        $test->run_tests();
-        $builder->reset;
-    }
-    #$suite->run_tests();
-}
 
 sub BUILD {
     my $self = shift;

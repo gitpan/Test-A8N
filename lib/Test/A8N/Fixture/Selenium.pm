@@ -1,4 +1,6 @@
 package Test::A8N::Fixture::Selenium;
+use warnings;
+use strict;
 
 use Moose::Role;
 use WWW::Selenium;

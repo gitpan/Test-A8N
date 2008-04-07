@@ -1,4 +1,6 @@
 package Test::A8N::Fixture;
+use warnings;
+use strict;
 
 use Moose;
 
@@ -56,32 +58,11 @@ sub _add_demolish_actions {
 }
 
 has 'config' => (
-    is => 'ro',
+    is => 'rw',
     required => 1,
     isa => 'HashRef',
+    default => sub { shift->testcase->config },
     lazy => 1,
-    default => sub {
-        my $self = shift;
-        my %user_config = ();
-
-        my $tc_config = $self->testcase->configuration;
-        my @config_files = @{ $tc_config };
-
-        my $file_config = $self->testcase->filename;
-        $file_config =~ s/\.st$/.conf/;
-        push @config_files, $file_config
-           if (-f $file_config);
-
-        push @config_files, glob('~/.a8rc');
-
-        while (my $config = shift @config_files) {
-            my $config_data = LoadFile($config);
-            die "Configuration $config is not a hash"
-                unless (ref($config_data) eq 'HASH');
-            %user_config = (%user_config, %$config_data);
-        }
-        return \%user_config;
-    }
 );
 
 has 'testcase' => (
@@ -98,9 +79,11 @@ has 'ctxt' => (
 );
 
 has verbose => (
-    is          => q{rw},
-    required    => 0,
-    isa         => q{Int}
+    required => 1,
+    lazy     => 1,
+    is       => q{ro},
+    isa      => q{Int},
+    default  => sub { return shift->config->{verbose} },
 );
 
 # NB: this is a FITesque method, please do not edit.
