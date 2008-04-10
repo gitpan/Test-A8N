@@ -31,7 +31,7 @@ sub BUILD {
     }
     diag sprintf(q{Using fixture class "%s"}, blessed($self))
         if ($self->verbose > 1);
-    diag "START: " . $self->testcase->id
+    diag sprintf('START: "%s": %s', $self->testcase->filename, $self->testcase->id)
         if ($self->verbose);
 }
 
@@ -42,7 +42,7 @@ sub DEMOLISH {
         $self->$coderef();
         $coderef = undef;
     }
-    diag "FINISH: " . $self->testcase->id
+    diag sprintf('FINISH: "%s": %s', $self->testcase->filename, $self->testcase->id)
         if ($self->verbose);
 }
 

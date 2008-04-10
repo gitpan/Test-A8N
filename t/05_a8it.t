@@ -65,12 +65,12 @@ DashDash_verbose: {
     is($?, 0, "single verbose: check error code");
     is($output, <<EOF, "single verbose: check actual TAP output");
 1..4
-# START: some_test_case_1
+# START: "t/testdata/cases/test1.tc": some_test_case_1
 ok 1 - fixture1
 ok 2 - fixture2
 ok 3 - fixture3
 ok 4 - fixture4
-# FINISH: some_test_case_1
+# FINISH: "t/testdata/cases/test1.tc": some_test_case_1
 EOF
 
     $output = runcmd("--file_root=t/testdata/cases -v -v t/testdata/cases/test1.tc");
@@ -78,7 +78,7 @@ EOF
     is($output, <<EOF, "double verbose: check actual TAP output");
 1..4
 # Using fixture class "Fixture"
-# START: some_test_case_1
+# START: "t/testdata/cases/test1.tc": some_test_case_1
 # Fixture method fixture1
 # Fixture method fixture2
 # Fixture method fixture3
@@ -91,7 +91,7 @@ ok 2 - fixture2
 ok 3 - fixture3
 # Fixture method fixture4
 ok 4 - fixture4
-# FINISH: some_test_case_1
+# FINISH: "t/testdata/cases/test1.tc": some_test_case_1
 EOF
 
     $output = runcmd("--file_root=t/testdata/cases -v -v -v t/testdata/cases/test1.tc");
@@ -100,7 +100,7 @@ EOF
 # Attempting to load fixture class Fixture
 1..4
 # Using fixture class "Fixture"
-# START: some_test_case_1
+# START: "t/testdata/cases/test1.tc": some_test_case_1
 # Fixture method fixture1
 # Fixture method fixture2
 # Fixture method fixture3
@@ -113,7 +113,7 @@ ok 2 - fixture2
 ok 3 - fixture3
 # Fixture method fixture4
 ok 4 - fixture4
-# FINISH: some_test_case_1
+# FINISH: "t/testdata/cases/test1.tc": some_test_case_1
 EOF
 }
 

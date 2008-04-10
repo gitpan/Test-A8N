@@ -4,8 +4,11 @@ Revision history for Test::A8N
     - First release to CPAN
 
 0.02 - Mon Apr  7 15:37:02 PDT 2008
-
     - Updated to make CPANTS happier
     - Changed configuration handling to pass a hash around
     - Added unit tests
     - Fixed tag handling when running tests
+
+0.03 - Thu Apr 10 09:58:00 PDT 2008
+    - Fixed broken test cases
+    - Added testcase filename to the verbose output

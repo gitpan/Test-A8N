@@ -10,7 +10,7 @@ use Test::A8N::File;
 use File::Find;
 use Storable qw(dclone);
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub BUILD {
     my $self = shift;
@@ -50,7 +50,7 @@ has verbose => (
 has testcase_id => (
     %default_lazy,
     isa     => q{Str},
-    default => sub { return shift->config->{testcase_id} },
+    default => sub { return shift->config->{testcase_id} || '' },
 );
 
 has filenames => (
@@ -128,7 +128,7 @@ sub run_tests {
             ? grep { $_->hasTags(@{ $self->config->{tags} }) } @{ $file->cases }
             : @{ $file->cases };
         foreach my $case (@cases) {
-            next if (defined $id and $case->id ne $id);
+            next if (length($id) and $case->id ne $id);
 
             my @data = @{ $case->test_data };
             my $test = Test::FITesque::Test->new({
