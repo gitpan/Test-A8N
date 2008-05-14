@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 25;
 use Test::Exception;
 use Test::Deep;
 use lib qw(t/mock t/lib);
@@ -130,5 +130,22 @@ Fixtures_With_Spaces: {
         }
     });
     is($file->fixture_class, 'Fixture::SystemStatus', q{Fixture class has been found for a directory with a space});
+}
+
+Invalid_Syntax: {
+    $Test::FITesque::ADDED_TESTS = [];
+    my $file;
+    lives_ok {
+        $file = Test::A8N::File->new({
+            filename => 't/testdata/cases/invalid_syntax.tc',
+            config   => {
+                file_root    => 't/testdata/cases',
+                fixture_base => 'Fixture',
+                %extra_defaults,
+            }
+        });
+    } "Loading file with invalid syntax doesn't die";
+    isa_ok($file, 'Test::A8N::File', q{Created File object for invalid_syntax.tc});
+    is_deeply($file->data, [], q{Invalid file's contents is empty});
 }
 

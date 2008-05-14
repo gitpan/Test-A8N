@@ -1,4 +1,3 @@
-use 5.008007;
 use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'Test::A8N',

@@ -16,6 +16,7 @@ my @files = (
     't/cases/test__with__spaces.tc',
     't/cases/System__Status/Basic__Status.tc',
     't/cases/test1.tc',
+    't/cases/invalid_syntax.tc',
     't/cases/storytest.st',
 );
 plan tests => 2 + scalar(@files) * 3;

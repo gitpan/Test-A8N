@@ -7,10 +7,10 @@ use Test::More;
 if (-f glob("~/.a8rc")) {
     plan(skip_all => "you can't run a8it unit tests if a ~/.a8rc file exists");
 } else {
-    plan(tests => 24);
+    plan(tests => 26);
 }
 
-my $a8it = "/usr/bin/env perl -Iblib -It/lib scripts/a8it %s 2>&1";
+my $a8it = "$^X -Iblib -It/lib scripts/a8it %s 2>&1";
 sub runcmd {
     my $cmd = sprintf($a8it, @_);
     return `$cmd`;
@@ -115,6 +115,10 @@ ok 3 - fixture3
 ok 4 - fixture4
 # FINISH: "t/testdata/cases/test1.tc": some_test_case_1
 EOF
+
+    $output = runcmd("--file_root=t/testdata/cases -v t/testdata/cases/invalid_syntax.tc");
+    is($?, 0, "single verbose: check error code");
+    like($output, qr{# YAML syntax error while loading t/testdata/cases/invalid_syntax\.tc}, "Invalid file produces error message with verbose");
 }
 
 DashDash_config: {

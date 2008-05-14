@@ -51,7 +51,13 @@ has data => (
     isa     => q{ArrayRef},
     default => sub { 
         my $self = shift;
-        my $content = [ LoadFile($self->filename) ];
+        my $content = [];
+        eval {
+            $content = [ LoadFile($self->filename) ];
+        };
+        if ($@) {
+            printf("# YAML syntax error while loading %s: %s\n", $self->filename, $@) if ($self->verbose);
+        }
         return $content;
     }
 );

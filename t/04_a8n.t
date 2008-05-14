@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use lib qw(t/mock t/lib);
 
-use Test::More tests => 53;
+use Test::More tests => 55;
 use Test::Exception;
 use Test::Deep;
 BEGIN { 
@@ -165,6 +165,7 @@ Directories_All: {
         [ sort @files ],
         [ sort(
             't/testdata/cases/test1.tc',
+            't/testdata/cases/invalid_syntax.tc',
             't/testdata/cases/test with spaces.tc',
             't/testdata/cases/UI/Reports/Report_Dashboard.tc',
             't/testdata/cases/UI/Config/Certificates/Views_Root_CA.tc',
@@ -304,3 +305,19 @@ Tags: {
         );
     }
 }
+
+Invalid_syntax: {
+    my $obj;
+    lives_ok {
+        $obj = Test::A8N->new({
+            config => {
+                filenames    => [qw( t/testdata/cases/invalid_syntax.tc )],
+                fixture_base => 'MockFixture',
+                file_root    => 't/testdata/cases',
+                allowed_extensions => ["tc","st"],
+            }
+        });
+    } "Creating a Test::A8N object with an invalid testcase doesn't die";
+    isa_ok($obj, 'Test::A8N', q{object constructed}) ;
+}
+

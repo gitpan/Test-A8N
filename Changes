@@ -12,3 +12,8 @@ Revision history for Test::A8N
 0.03 - Thu Apr 10 09:58:00 PDT 2008
     - Fixed broken test cases
     - Added testcase filename to the verbose output
+
+0.04 - Wed May 14 13:49:28 PDT 2008
+    - Made Makefile.PL work on perl versions prior to 5.8
+    - Address issues with YAML::Syck die'ing when it loads an invalid testcase
+    - Fix issue with a8n unit test failing when run with a perl other than the default environment's perl
