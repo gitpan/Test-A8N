@@ -10,7 +10,7 @@ use Test::A8N::File;
 use File::Find;
 use Storable qw(dclone);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub BUILD {
     my $self = shift;
@@ -19,8 +19,11 @@ sub BUILD {
         file_root          => "cases",
         filenames          => [],
         verbose            => 0,
-        tags               => [],
         allowed_extensions => [qw( tc st )],
+        tags               => {
+            include => [],
+            exclude => [],
+        },
     );
     foreach my $key (keys %defaults) {
         next if exists $self->config->{$key};
@@ -124,12 +127,8 @@ sub run_tests {
 
     my $test_count = 0;
     foreach my $file (@{ $self->files }) {
-        my @cases = @{ $self->config->{tags} }
-            ? grep { $_->hasTags(@{ $self->config->{tags} }) } @{ $file->cases }
-            : @{ $file->cases };
+        my @cases = @{ $file->filtered_cases( $id ) };
         foreach my $case (@cases) {
-            next if (length($id) and $case->id ne $id);
-
             my @data = @{ $case->test_data };
             my $test = Test::FITesque::Test->new({
                 data => [ 

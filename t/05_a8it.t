@@ -7,7 +7,7 @@ use Test::More;
 if (-f glob("~/.a8rc")) {
     plan(skip_all => "you can't run a8it unit tests if a ~/.a8rc file exists");
 } else {
-    plan(tests => 26);
+    plan(tests => 38);
 }
 
 my $a8it = "$^X -Iblib -It/lib scripts/a8it %s 2>&1";
@@ -119,6 +119,49 @@ EOF
     $output = runcmd("--file_root=t/testdata/cases -v t/testdata/cases/invalid_syntax.tc");
     is($?, 0, "single verbose: check error code");
     like($output, qr{# YAML syntax error while loading t/testdata/cases/invalid_syntax\.tc}, "Invalid file produces error message with verbose");
+}
+
+DashDash_list: {
+    my $output;
+
+    $output = runcmd("--file_root=t/testdata/cases --list t/testdata/cases/test1.tc");
+    is($?, 0, "list test1.tc: check error code");
+    is($output, <<EOF, "list test1.tc: check output");
+t/testdata/cases/test1.tc => some_test_case_1
+EOF
+
+    $output = runcmd("--file_root=t/testdata/cases --list t/testdata/cases/test_multiple.st");
+    is($?, 0, "list test_multiple.st: check error code");
+    is($output, <<EOF, "list test_multiple.st: check output");
+t/testdata/cases/test_multiple.st => test_case_1
+t/testdata/cases/test_multiple.st => custom_id
+t/testdata/cases/test_multiple.st => some_other_id
+EOF
+
+    $output = runcmd("--file_root=t/testdata/cases --list --id=test_case_1 t/testdata/cases/test_multiple.st");
+    is($?, 0, "id arg: check error code");
+    is($output, <<EOF, "id arg: check output");
+t/testdata/cases/test_multiple.st => test_case_1
+EOF
+
+    $output = runcmd("--file_root=t/testdata/cases --list --tag=tag1 t/testdata/cases/test_multiple.st");
+    is($?, 0, "single tag: check error code");
+    is($output, <<EOF, "single tag: check output");
+t/testdata/cases/test_multiple.st => test_case_1
+t/testdata/cases/test_multiple.st => custom_id
+EOF
+
+    $output = runcmd("--file_root=t/testdata/cases --list --tag=tag1 --tag=tag2 t/testdata/cases/test_multiple.st");
+    is($?, 0, "multiple tags: check error code");
+    is($output, <<EOF, "multiple tags: check output");
+t/testdata/cases/test_multiple.st => test_case_1
+EOF
+
+    $output = runcmd("--file_root=t/testdata/cases --list --tag=tag1 --tag=!tag2 t/testdata/cases/test_multiple.st");
+    is($?, 0, "exclude tag: check error code");
+    is($output, <<EOF, "exclude tag: check output");
+t/testdata/cases/test_multiple.st => custom_id
+EOF
 }
 
 DashDash_config: {

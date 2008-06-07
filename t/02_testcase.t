@@ -14,7 +14,10 @@ my %config_defaults = (
     file_root          => "t/testdata/cases",
     filenames          => [],
     verbose            => 0,
-    tags               => [],
+    tags         => {
+        include => [],
+        exclude => [],
+    },
     allowed_extensions => [qw( tc st )],
 );
 

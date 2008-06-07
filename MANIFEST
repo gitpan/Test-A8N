@@ -12,8 +12,8 @@ scripts/a8-generate-fixture-list
 scripts/a8-validate
 scripts/a8-validate-all
 scripts/a8it
-t/00pod.t
-t/01fixup.t
+t/00_pod.t
+t/01_fixup.t
 t/02_testcase.t
 t/03_file.t
 t/04_a8n.t

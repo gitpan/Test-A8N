@@ -89,6 +89,23 @@ has cases => (
     }
 );
 
+sub filtered_cases {
+    my $self = shift;
+    my ($id) = @_;
+
+    my @cases = @{ $self->cases };
+    if (@{ $self->config->{'tags'}->{'include'} }) {
+        @cases = grep { $_->hasTags(@{ $self->config->{'tags'}->{'include'} }) } @cases;
+    }
+    if (@{ $self->config->{'tags'}->{'exclude'} }) {
+        @cases = grep { !$_->hasTags(@{ $self->config->{'tags'}->{'exclude'} }) } @cases;
+    }
+    if ($id) {
+        @cases = grep { $_->id eq $id } @cases;
+    }
+    return \@cases;
+}
+
 has fixture_class => (
     %default_lazy,
     isa     => q{Str},

@@ -15,7 +15,10 @@ BEGIN {
 my %extra_defaults = (
     filenames    => [],
     verbose      => 0,
-    tags         => [],
+    tags         => {
+        include => [],
+        exclude => [],
+    },
     allowed_extensions => [qw( tc st )],
 );
 

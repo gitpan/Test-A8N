@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use lib qw(t/mock t/lib);
 
-use Test::More tests => 55;
+use Test::More tests => 60;
 use Test::Exception;
 use Test::Deep;
 BEGIN { 
@@ -37,7 +37,10 @@ Basic_usage: {
             fixture_base => 'MockFixture',
             file_root    => 't/testdata/cases',
             verbose      => 0,
-            tags         => [],
+            tags         => {
+                include => [],
+                exclude => [],
+            },
             allowed_extensions => [qw( tc st )],
         },
         q{config() returns supplied args with defaults}
@@ -89,7 +92,10 @@ Different_extension: {
             fixture_base => 'MockFixture',
             file_root    => 't/testdata/cases',
             verbose      => 0,
-            tags         => [],
+            tags         => {
+                include => [],
+                exclude => [],
+            },
             allowed_extensions => [qw( tc st )],
         },
         q{config() returns supplied args with defaults}
@@ -151,7 +157,10 @@ Directories_All: {
             fixture_base => 'MockFixture',
             file_root    => 't/testdata/cases',
             verbose      => 0,
-            tags         => [],
+            tags         => {
+                include => [],
+                exclude => [],
+            },
             allowed_extensions => [qw( tc st )],
         },
         q{config() returns supplied args with defaults}
@@ -274,18 +283,23 @@ Tags: {
     my $a8n;
 
     my @tag_tests = (
-        { tests => 3, tags => [] },
-        { tests => 2, tags => [qw( tag1 )] },
-        { tests => 1, tags => [qw( tag2 )] },
-        { tests => 1, tags => [qw( tag3 )] },
-        { tests => 0, tags => [qw( foo )] },
-        { tests => 0, tags => [qw( foo bar )] },
-        { tests => 0, tags => [qw( tag1 foo )] },
-        { tests => 0, tags => [qw( tag2 foo )] },
-        { tests => 0, tags => [qw( tag2 foo )] },
-        { tests => 1, tags => [qw( tag1 tag2 )] },
-        { tests => 1, tags => [qw( tag1 tag2 )] },
-        { tests => 0, tags => [qw( tag1 tag2 tag3)] },
+        { tests => 3, include => [qw()],                exclude => [qw()] },
+        { tests => 2, include => [qw( tag1 )],          exclude => [qw()] },
+        { tests => 1, include => [qw( tag1 )],          exclude => [qw( tag2 )] },
+        { tests => 1, include => [qw( tag2 )],          exclude => [qw()] },
+        { tests => 0, include => [qw( tag2 )],          exclude => [qw( tag1 )] },
+        { tests => 1, include => [qw( tag3 )],          exclude => [qw()] },
+        { tests => 1, include => [qw( tag3 )],          exclude => [qw( tag1 )] },
+        { tests => 1, include => [qw( tag3 )],          exclude => [qw( tag1 tag2 )] },
+        { tests => 0, include => [qw( foo )],           exclude => [qw()] },
+        { tests => 0, include => [qw( foo bar )],       exclude => [qw()] },
+        { tests => 0, include => [qw( tag1 foo )],      exclude => [qw()] },
+        { tests => 0, include => [qw( tag2 foo )],      exclude => [qw()] },
+        { tests => 0, include => [qw( tag2 foo )],      exclude => [qw()] },
+        { tests => 1, include => [qw( tag1 tag2 )],     exclude => [qw()] },
+        { tests => 1, include => [qw( tag1 tag2 )],     exclude => [qw( tag3 )] },
+        { tests => 1, include => [qw( tag1 tag2 )],     exclude => [qw()] },
+        { tests => 0, include => [qw( tag1 tag2 tag3)], exclude => [qw()] },
     );
     foreach my $tag_test (@tag_tests) {
         $Test::FITesque::Suite::ADDED_TESTS = [];
@@ -294,14 +308,22 @@ Tags: {
                 filenames    => ['t/testdata/cases/test_multiple.st'],
                 file_root    => 't/testdata/cases',
                 fixture_base => 'Fixture',
-                tags         => $tag_test->{tags}
+                tags         => {
+                    include => $tag_test->{include},
+                    exclude => $tag_test->{exclude},
+                },
             }
         });
         $a8n->run_tests();
         is(
             scalar(@{ $Test::FITesque::Suite::ADDED_TESTS }),
             $tag_test->{tests},
-            sprintf(q{run_tests runs %d tests with tags "%s"}, $tag_test->{tests}, join('", "', @{ $tag_test->{tags} }))
+            sprintf(
+                q{run_tests runs %d tests with tags "%s" and without "%s"},
+                $tag_test->{tests},
+                join('", "', @{ $tag_test->{include} }),
+                join('", "', @{ $tag_test->{exclude} })
+            )
         );
     }
 }
