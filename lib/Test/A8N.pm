@@ -10,7 +10,7 @@ use Test::A8N::File;
 use File::Find;
 use Storable qw(dclone);
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub BUILD {
     my $self = shift;

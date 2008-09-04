@@ -98,7 +98,14 @@ sub filtered_cases {
         @cases = grep { $_->hasTags(@{ $self->config->{'tags'}->{'include'} }) } @cases;
     }
     if (@{ $self->config->{'tags'}->{'exclude'} }) {
-        @cases = grep { !$_->hasTags(@{ $self->config->{'tags'}->{'exclude'} }) } @cases;
+        my @filtered_cases = ();
+        CASE: foreach my $case (@cases) {
+            foreach my $tag (@{ $self->config->{'tags'}->{'exclude'} }) {
+                next CASE if ($case->hasTags($tag));
+            }
+            push @filtered_cases, $case;
+        }
+        @cases = @filtered_cases;
     }
     if ($id) {
         @cases = grep { $_->id eq $id } @cases;

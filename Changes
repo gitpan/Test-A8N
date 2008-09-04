@@ -23,3 +23,6 @@ Revision history for Test::A8N
     - Added !tag option support on command-line script
     - Added --list option to only list which cases will be run
     - Added unit tests
+
+0.06 - Thu Sep  4 11:58:41 PDT 2008
+    - Made exclude-tags OR tags together, instead of ANDing them

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use lib qw(t/mock t/lib);
 
-use Test::More tests => 60;
+use Test::More tests => 64;
 use Test::Exception;
 use Test::Deep;
 BEGIN { 
@@ -300,6 +300,10 @@ Tags: {
         { tests => 1, include => [qw( tag1 tag2 )],     exclude => [qw( tag3 )] },
         { tests => 1, include => [qw( tag1 tag2 )],     exclude => [qw()] },
         { tests => 0, include => [qw( tag1 tag2 tag3)], exclude => [qw()] },
+        { tests => 1, include => [qw( )],               exclude => [qw( tag1 tag2 )] },
+        { tests => 0, include => [qw( )],               exclude => [qw( tag1 tag3 )] },
+        { tests => 1, include => [qw( )],               exclude => [qw( tag2 tag3 )] },
+        { tests => 3, include => [qw( )],               exclude => [qw( foo )] },
     );
     foreach my $tag_test (@tag_tests) {
         $Test::FITesque::Suite::ADDED_TESTS = [];
